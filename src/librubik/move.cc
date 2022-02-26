@@ -2,6 +2,5 @@
 
 namespace rubik
 {
-    // FIXME
 
 } // namespace rubik

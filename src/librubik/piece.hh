@@ -3,6 +3,8 @@
 #include <iostream>
 
 #include "color.hh"
+#include "matrix3D.hh"
+#include "move.hh"
 #include "vector3D.hh"
 
 namespace rubik
@@ -22,8 +24,13 @@ namespace rubik
         };
 
         Type get_type();
+
+        // MOVES
+        void do_move(Axis axis, Direction dir);
+        void do_move(Face face, Direction dir);
     };
 
+    // OPERATORS
     inline std::ostream& operator<<(std::ostream& os, const Piece& p)
     {
         return os << p.coords << " " << p.colors << "\n";
