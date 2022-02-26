@@ -27,7 +27,9 @@ namespace rubik
             return os << 'W';
         else if (color == Color::BLUE)
             return os << 'B';
-        else
+        else if (color == Color::ORANGE)
             return os << 'O';
+        else
+            return os << 'X';
     }
 } // namespace rubik

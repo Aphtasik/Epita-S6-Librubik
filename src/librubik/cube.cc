@@ -1,10 +1,62 @@
 #include "cube.hh"
 
+#include <algorithm>
+
 namespace rubik
 {
     Cube::Cube(std::vector<Piece> p)
     {
         pieces_ = p;
+    }
+
+    std::vector<Piece>::iterator Cube::begin()
+    {
+        return pieces_.begin();
+    }
+    std::vector<Piece>::iterator Cube::end()
+    {
+        return pieces_.end();
+    }
+
+    std::vector<Piece>::const_iterator Cube::begin() const
+    {
+        return pieces_.begin();
+    }
+    std::vector<Piece>::const_iterator Cube::end() const
+    {
+        return pieces_.end();
+    }
+
+    Piece Cube::find_piece(Vector3D<int> coords) const
+    {
+        for (auto piece : pieces_)
+        {
+            if (piece.coords == coords)
+                return piece;
+        }
+        throw std::invalid_argument("Could not find piece by coords");
+    }
+
+    Piece Cube::find_piece(Vector3D<Color> colors) const
+    {
+        std::vector<Color> colors_c;
+        colors_c.push_back(colors.x);
+        colors_c.push_back(colors.y);
+        colors_c.push_back(colors.z);
+        std::sort(colors_c.begin(), colors_c.end());
+
+        for (auto piece : pieces_)
+        {
+            std::vector<Color> piece_c;
+            piece_c.push_back(piece.colors.x);
+            piece_c.push_back(piece.colors.y);
+            piece_c.push_back(piece.colors.z);
+            std::sort(piece_c.begin(), piece_c.end());
+
+            if (colors_c == piece_c)
+                return piece;
+        }
+        throw std::invalid_argument("Could not find piece by colors");
     }
 
     Cube::Cube()

@@ -2,6 +2,7 @@
 
 #include <istream>
 #include <vector>
+#include <iterator>
 
 #include "piece.hh"
 namespace rubik
@@ -22,6 +23,13 @@ namespace rubik
 
             return os;
         }
+        std::vector<Piece>::const_iterator begin() const;
+        std::vector<Piece>::iterator begin();
+        std::vector<Piece>::const_iterator end() const;
+        std::vector<Piece>::iterator end();
+
+        Piece find_piece(Vector3D<int> coords) const;
+        Piece find_piece(Vector3D<Color> colors) const;
 
 
     private:
