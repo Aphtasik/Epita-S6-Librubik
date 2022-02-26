@@ -6,8 +6,11 @@
 
 // FIXME: forward declaration to make the solver code compile, you can remove it
 // once you have implemented the core features.
-class Move;
-class Cube;
+namespace rubik
+{
+    class Move;
+    class Cube;
+}
 
 namespace rubik::solver
 {
