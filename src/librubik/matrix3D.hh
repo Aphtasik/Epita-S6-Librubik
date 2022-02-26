@@ -12,7 +12,7 @@ namespace rubik
     class Matrix3D
     {
     public:
-        inline Matrix3D(std::array<std::array<int, 3>, 3> values)
+        inline Matrix3D(std::array<std::array<T, 3>, 3> values)
             : values(values)
         {}
 

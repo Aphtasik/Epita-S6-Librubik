@@ -137,110 +137,196 @@ namespace rubik
         else
             return Color::NONE;
     }
-} // namespace rubik
 
-rubik::Cube rubik::Cube::from_stream(std::istream& file_in)
-{
-    std::string str;
-    std::string line;
-    std::vector<Piece> pieces;
-    // For each line in file
-    while (std::getline(file_in, line))
+    Cube Cube::from_stream(std::istream& file_in)
     {
-        str.clear();
-        int i = 0; // Line index
-        int part = 0; // Nb of slot in parenthesis
-        Piece p;
-
-        // First parenthesis
-        if (line[i] == '(')
+        std::string str;
+        std::string line;
+        std::vector<Piece> pieces;
+        // For each line in file
+        while (std::getline(file_in, line))
         {
-            i++;
-            Vector3D<int> coords;
+            str.clear();
+            int i = 0; // Line index
+            int part = 0; // Nb of slot in parenthesis
+            Piece p;
 
-            // While end not reached
-            while (line[i] != '\n' && line[i] != ')')
+            // First parenthesis
+            if (line[i] == '(')
             {
-                while (is_valid_num(line[i]))
-                {
-                    str.push_back(line[i]);
-                    i++;
-                }
+                i++;
+                Vector3D<int> coords;
 
-                if (line[i] != ',' && line[i] != ')')
-                    throw std::invalid_argument("Building file error");
-                else
+                // While end not reached
+                while (line[i] != '\n' && line[i] != ')')
                 {
-                    // Put number in coords
-                    if (part == 0)
-                        coords.x = std::atoi(str.c_str());
-                    else if (part == 1)
-                        coords.y = std::atoi(str.c_str());
-                    else
-                        coords.z = std::atoi(str.c_str());
-
-                    if (line[i] == ',')
+                    while (is_valid_num(line[i]))
+                    {
+                        str.push_back(line[i]);
                         i++;
-                    str.clear();
-                    part++;
+                    }
+
+                    if (line[i] != ',' && line[i] != ')')
+                        throw std::invalid_argument("Building file error");
+                    else
+                    {
+                        // Put number in coords
+                        if (part == 0)
+                            coords.x = std::atoi(str.c_str());
+                        else if (part == 1)
+                            coords.y = std::atoi(str.c_str());
+                        else
+                            coords.z = std::atoi(str.c_str());
+
+                        if (line[i] == ',')
+                            i++;
+                        str.clear();
+                        part++;
+                    }
                 }
+                p.coords = coords;
+                i++;
             }
-            p.coords = coords;
-            i++;
-        }
-        else
-            throw std::invalid_argument("Building file error");
+            else
+                throw std::invalid_argument("Building file error");
 
-        // Mid section
-        if (line[i] != ' ')
-            throw std::invalid_argument("Building file error");
-        else
-            i++;
+            // Mid section
+            if (line[i] != ' ')
+                throw std::invalid_argument("Building file error");
+            else
+                i++;
 
-        // second parenthesis
-        if (line[i] == '(')
-        {
-            i++;
-            part = 0;
-            Vector3D<Color> colors;
-
-            // While end not reached
-            while (line[i] != '\n' && line[i] != ')')
+            // second parenthesis
+            if (line[i] == '(')
             {
-                while (is_valid_color(line[i]))
-                {
-                    str.push_back(line[i]);
-                    i++;
-                }
+                i++;
+                part = 0;
+                Vector3D<Color> colors;
 
-                if (line[i] != ',' && line[i] != ')')
-                    throw std::invalid_argument("Building file error");
-                else
+                // While end not reached
+                while (line[i] != '\n' && line[i] != ')')
                 {
-                    // Put number in coords
-                    if (part == 0)
-                        colors.x = get_color_from_letter(str.c_str());
-                    else if (part == 1)
-                        colors.y = get_color_from_letter(str.c_str());
-                    else
-                        colors.z = get_color_from_letter(str.c_str());
-
-                    if (line[i] == ',')
+                    while (is_valid_color(line[i]))
+                    {
+                        str.push_back(line[i]);
                         i++;
-                    str.clear();
-                    part++;
+                    }
+
+                    if (line[i] != ',' && line[i] != ')')
+                        throw std::invalid_argument("Building file error");
+                    else
+                    {
+                        // Put number in coords
+                        if (part == 0)
+                            colors.x = get_color_from_letter(str.c_str());
+                        else if (part == 1)
+                            colors.y = get_color_from_letter(str.c_str());
+                        else
+                            colors.z = get_color_from_letter(str.c_str());
+
+                        if (line[i] == ',')
+                            i++;
+                        str.clear();
+                        part++;
+                    }
                 }
+                p.colors = colors;
+                i++;
             }
-            p.colors = colors;
-            i++;
+            else
+                throw std::invalid_argument("Building file error");
+
+            if (line[i] != '\n' && line[i] != '\0')
+                throw std::invalid_argument("Building file error");
+
+            pieces.push_back(p);
         }
-        else
-            throw std::invalid_argument("Building file error");
-
-        if (line[i] != '\n' && line[i] != '\0')
-            throw std::invalid_argument("Building file error");
-
-        pieces.push_back(p);
+        return Cube(pieces);
     }
-    return Cube(pieces);
-}
+
+    // Moves
+    void Cube::do_move(Move move)
+    {
+        try
+        {
+            Face f = std::get<Face>(move.mvt);
+            for (auto& piece : pieces_)
+            {
+                if (f == Face::FRONT && piece.coords.x == 1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+                else if (f == Face::BACK && piece.coords.x == -1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+                else if (f == Face::RIGHT && piece.coords.y == 1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+                else if (f == Face::LEFT && piece.coords.y == -1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+                else if (f == Face::UP && piece.coords.z == 1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+                else if (f == Face::DOWN && piece.coords.z == -1)
+                {
+                    if (move.is_double)
+                        piece.do_move(f, move.dir);
+                    piece.do_move(f, move.dir);
+                }
+            }
+        }
+        catch (...)
+        {
+            Axis a = std::get<Axis>(move.mvt);
+            for (auto& piece : pieces_)
+            {
+                if (move.is_double)
+                    piece.do_move(a, move.dir);
+                piece.do_move(a, move.dir);
+            }
+        }
+    }
+
+    void Cube::do_moves(std::vector<Move> moves)
+    {
+        for (auto move : moves)
+            do_move(move);
+    }
+
+    void Cube::undo_move(Move move)
+    {
+        if (move.dir == Direction::CLOCKWISE)
+        {
+            auto m =
+                Move{ move.mvt, Direction::ANTI_CLOCKWISE, move.is_double };
+            do_move(m);
+        }
+        else
+        {
+            auto m = Move{ move.mvt, Direction::CLOCKWISE, move.is_double };
+            do_move(m);
+        }
+    }
+
+    void Cube::undo_moves(std::vector<Move> moves)
+    {
+        auto it = moves.rbegin();
+        for (; it != moves.rend(); it++)
+            undo_move(*it);
+    }
+} // namespace rubik
